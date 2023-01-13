@@ -1,8 +1,9 @@
 from fastapi import FastAPI
+from typing import List
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from database import Base, engine, Session
-from schemas import AddMovieSchema
+from schemas import AddMovieSchema, MovieSchema
 from models import Movie
 app = FastAPI()
 
@@ -12,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 def index():
     return "ok"
 
-@app.get("/movies")
+@app.get("/movies",response_model=List[MovieSchema])
 def list_movies():
     db = Session()
     result = db.query(Movie).all()
@@ -37,7 +38,7 @@ def update_movie(id: int, movie_update: AddMovieSchema):
     db.commit()
     return {"message": f"Movie pk: '{id}' update successfully"}
 
-@app.get(f"/movies/{id}/")
+@app.get(f"/movies/{id}/",response_model=MovieSchema)
 def get_movie(id: int):
     db = Session()
     result = db.query(Movie).filter(Movie.id == id).first()
